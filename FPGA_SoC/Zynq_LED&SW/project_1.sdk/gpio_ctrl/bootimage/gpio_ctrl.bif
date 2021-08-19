@@ -1,0 +1,7 @@
+//arch = zynq; split = false; format = BIN
+the_ROM_image:
+{
+	[bootloader]C:\project_1\project_1.sdk\gpio_ctrl_fsbl\Debug\gpio_ctrl_fsbl.elf
+	C:\project_1\project_1.sdk\zync_gpio_wrapper_hw_platform_0\zync_gpio_wrapper.bit
+	C:\project_1\project_1.sdk\gpio_ctrl\Debug\gpio_ctrl.elf
+}

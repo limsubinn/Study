@@ -1,0 +1,354 @@
+module secret(
+clk,
+n_reset,
+usr,
+open, 
+test, 
+led_1,
+led_2,
+led_3,
+led_4,
+debug_in,
+debug_out,
+//store_start
+n_mem_we, 
+//store_led
+STORE_1_LED,
+STORE_2_LED,
+STORE_3_LED
+);
+
+input clk, n_reset;
+input [12-1:0] usr;
+output reg open;
+output reg led_1,led_2,led_3,led_4;
+output [1:0] debug_out;
+input debug_in;
+//store_led
+output reg STORE_1_LED,STORE_2_LED,STORE_3_LED;
+
+//memory ->ledY23
+input n_mem_we;
+
+//store_state
+reg [3-1:0] s_current_state;
+reg [3-1:0] s_next_state;
+
+//state
+reg [4-1:0] current_state;
+reg [4-1:0] next_state;
+
+/*
+reg [12-1:0] secret_num_1 = 12'hFF7;
+reg [12-1:0] secret_num_2 = 12'hF7F;
+reg [12-1:0] secret_num_3 = 12'hFFE;
+*/
+
+//memory
+reg [12-1:0] mem_secret_num [0:4-1];
+
+//state_parameter
+parameter [4-1:0] IDLE = 4'b0000, START_R = 4'b0001, START = 4'b0010, STATE_1_R = 4'b0011, STATE_1 = 4'b0100, STATE_2_R =4'b0101, STATE_2 = 4'b0110, STATE_3_R = 4'b0111, STATE_3 = 4'b1000;
+
+//store_state_parameter
+parameter [3-1:0] STORE_START = 3'b000, STORE_1_R = 3'b001, STORE_1 = 3'b010, STORE_2_R = 3'b011, STORE_2 = 3'b100, STORE_3_R = 3'b101, STORE_3 = 3'b110;
+
+parameter SIZE_1 = 26;
+parameter SIZE_2 = 24;
+
+reg [SIZE_1-1:0] cnt_1;
+reg [SIZE_2-1:0] cnt_2;
+
+output reg test;
+
+always @(posedge clk or negedge n_reset)begin
+  if (!n_reset) begin
+    cnt_1<={(SIZE_1){1'b0}};
+  end
+  else begin
+    if (cnt_1 == {SIZE_1{1'b1}})begin 
+	   cnt_1 <= {SIZE_1{1'b0}};
+	 end
+	 else begin
+	   cnt_1 <= cnt_1 + {{(SIZE_1-1){1'b0}},{1'b1}};
+	 end
+  end
+end
+
+always @(posedge clk or negedge n_reset)begin
+    if (!n_reset) begin
+		test <=1'b0;
+    end
+    else begin
+    if (cnt_1 == {{1'b0}, {(SIZE_1-1){1'b1}}}) begin
+      test <= 1'b1;
+	 end
+	 if (cnt_1 == {SIZE_1{1'b0}})begin
+	   test <=1'b0;
+	 end
+  end
+end
+
+always @(posedge clk or negedge n_reset)begin
+  if (!n_reset) begin
+    cnt_2<={(SIZE_2){1'b0}};
+  end
+  else begin
+    //if (usr == 12'hFFF || current_state == IDLE || current_state == START_R || current_state == START || current_state == STATE_1_R || current_state == STATE_1 ||  current_state == STATE_2_R ||current_state == STATE_2 ||  current_state == STATE_3_R ||current_state == STATE_3 || s_current_state == STORE_START ||  s_current_state == STORE_1_R ||s_current_state == STORE_1 || s_current_state == STORE_2_R || s_current_state == STORE_2 || s_current_state == STORE_3_R ||s_current_state == STORE_3) begin
+      if (cnt_2 == {SIZE_2{1'b1}} || current_state != current_state || s_current_state != s_current_state  )begin	
+	     cnt_2 <= {SIZE_2{1'b0}};
+		end
+	   else  begin
+        cnt_2 <= cnt_2 + {{(SIZE_2-1){1'b0}},{1'b1}};
+	   end
+     //end
+	  //else begin
+	  //  cnt_2 <= {SIZE_2{1'b0}};
+	  //end
+  end
+end
+
+
+/*
+always @ (posedge clk or negedge n_reset) begin 
+  if (!n_reset) begin 
+    current_state <= 4'b0000;
+  end
+  else begin
+    current_state <= next_state;
+  end
+end
+*/
+
+
+always @(*) begin
+  case(current_state)
+    IDLE : next_state = (usr == 12'h7FF && cnt_2 == {SIZE_2{1'b1}})? START_R:
+                        (usr == 12'hFFF)? current_state:
+								(usr != 12'h7FF)? IDLE:
+                        current_state;
+								
+	 START_R : next_state = (usr == 12'hFFF && cnt_2 == {SIZE_2{1'b1}})? START : current_state;	 
+	
+  	 START : next_state = (usr == 12'h7FF && cnt_2 == {SIZE_2{1'b1}})? START_R:
+								 (usr == 12'hFFF)? current_state:
+								 (usr == 12'h7FF)? current_state:
+                         (usr == mem_secret_num[0] && cnt_2 == {SIZE_2{1'b1}})? STATE_1_R:
+                         (usr != mem_secret_num[0])? IDLE:
+                         current_state;
+	 
+	 STATE_1_R : next_state = (usr == 12'hFFF && cnt_2 == {SIZE_2{1'b1}})? STATE_1 : current_state;							 
+    
+	 STATE_1: next_state = (usr == 12'hFFF)? current_state:
+                          (usr == 12'h7FF && cnt_2 == {SIZE_2{1'b1}})? START_R:
+								  //(usr == secret_num_1)? current_state:
+                          (usr == mem_secret_num[1] && cnt_2 == {SIZE_2{1'b1}})? STATE_2_R:
+                          (usr != mem_secret_num[1])? IDLE:
+                          current_state;
+	 
+	 STATE_2_R : next_state = (usr == 12'hFFF && cnt_2 == {SIZE_2{1'b1}})? STATE_2 : current_state;						  
+    
+	 STATE_2: next_state = (usr == 12'h7FF && cnt_2 == {SIZE_2{1'b1}})? START_R:
+                          (usr == 12'hFFF)? current_state:
+								  //(usr == secret_num_2)? current_state:
+                          (usr == mem_secret_num[2] && cnt_2 == {SIZE_2{1'b1}})? STATE_3_R:
+                          (usr != mem_secret_num[2])? IDLE:
+                          current_state;			
+	 
+	 STATE_3_R : next_state = (usr == 12'hFFF && cnt_2 == {SIZE_2{1'b1}})? STATE_3 : current_state;	  
+    
+	 STATE_3: next_state = (usr == 12'h7FF && cnt_2 == {SIZE_2{1'b1}})? START_R:
+                          (usr == 12'hFFF)? current_state:
+								  //(usr == secret_num_3)? current_state:
+                          IDLE;
+    default next_state = IDLE;
+  endcase
+end    
+
+  
+
+always @(*) begin
+  case(current_state)
+    IDLE : open =1'b0;
+	 START_R : open =1'b0;
+    START : open =1'b0;
+	 STATE_1_R: open =1'b0;
+    STATE_1: open =1'b0;
+	 STATE_2_R: open =1'b0;
+    STATE_2: open =1'b0;
+	 STATE_3_R: open =1'b1;
+    STATE_3: open =1'b1;
+    default open =1'b0;
+  endcase
+end 
+
+always @(*) begin
+  if (current_state == START_R || current_state == START) begin
+    led_1 = 1'b1;
+  end
+  else begin
+    led_1 = 1'b0;
+  end
+end
+
+always @(*) begin
+  if (current_state == STATE_1_R || current_state == STATE_1) begin
+    led_2 = 1'b1;
+  end
+  else begin
+    led_2 = 1'b0;
+  end
+end
+
+always @(*) begin
+  if (current_state == STATE_2_R || current_state == STATE_2) begin
+    led_3 = 1'b1;
+  end
+  else begin
+    led_3 = 1'b0;
+  end
+end
+
+always @(*) begin
+  if (current_state == IDLE)begin
+    led_4 =1'b1;
+  end
+  else begin
+    led_4 = 1'b0;
+  end
+end
+
+assign debug_out = {usr[0],debug_in};
+
+//memory
+always @(posedge clk or negedge n_reset) begin
+  if(!n_reset) begin
+	 current_state <= 4'b0000;
+	 s_current_state <=3'b000;
+  end
+  else 
+    if (n_mem_we == 1'b0) begin
+	   s_current_state <= s_next_state;
+	 end
+	 else begin
+	 current_state <= next_state;
+	 s_current_state <=3'b000;
+	 end
+end
+
+//store_state_machine
+always @(*) begin
+  case(s_current_state)
+    STORE_START : s_next_state = (usr != 12'hFFF && cnt_2 == {SIZE_2{1'b1}})? STORE_1_R:
+                                 s_current_state;
+								
+	 STORE_1_R : s_next_state = (usr == 12'hFFF && cnt_2 == {SIZE_2{1'b1}})? STORE_1 : 
+	                            s_current_state;	 								 
+	
+  	 STORE_1 : s_next_state = (usr != 12'hFFF && cnt_2 == {SIZE_2{1'b1}})? STORE_2_R:
+                             s_current_state;
+	 
+	 STORE_2_R : s_next_state = (usr == 12'hFFF && cnt_2 == {SIZE_2{1'b1}})? STORE_2 : 
+	                            s_current_state;						 
+
+	 STORE_2 : s_next_state = (usr != 12'hFFF && cnt_2 == {SIZE_2{1'b1}})? STORE_3_R:
+                             s_current_state;
+	 
+	 STORE_3_R : s_next_state = (usr == 12'hFFF && cnt_2 == {SIZE_2{1'b1}})? STORE_3 : 
+	                            s_current_state;						  
+	 
+	 STORE_3 : s_next_state = s_current_state;
+									  
+    default s_next_state = STORE_START;
+  endcase
+end    
+
+
+//store_memory[0, 1, 2]
+always @(posedge clk or negedge n_reset) begin
+  if (!n_reset) begin
+    mem_secret_num[0] <= 12'hFF7;
+  end
+  else begin
+    if(s_current_state == STORE_1_R && usr != 12'hFFF && cnt_2 == {{1'b1},{(SIZE_2-1){1'b0}}}) begin
+	   if (mem_secret_num[0] == usr) begin 
+		  mem_secret_num[0] <= mem_secret_num[0];
+		end
+		else begin
+		  mem_secret_num[0] <= usr;
+		end
+	 end
+	 else begin
+	   mem_secret_num[0] <= mem_secret_num[0];
+	 end
+  end
+end
+
+always @(posedge clk or negedge n_reset) begin
+  if (!n_reset) begin
+    mem_secret_num[1] <= 12'hF7F;
+  end
+  else begin
+    if(s_current_state == STORE_2_R && usr != 12'hFFF && cnt_2 == {{1'b1},{(SIZE_2-1){1'b0}}}) begin
+	   if (mem_secret_num[1] == usr) begin 
+		  mem_secret_num[1] <= mem_secret_num[1];
+		end
+		else begin
+		  mem_secret_num[1] <= usr;
+		end
+	 end
+	 else begin
+	   mem_secret_num[1] <= mem_secret_num[1];
+	 end
+  end
+end
+
+always @(posedge clk or negedge n_reset) begin
+  if (!n_reset) begin
+    mem_secret_num[2] <= 12'hFFE;
+  end
+  else begin
+    if(s_current_state == STORE_3_R && usr != 12'hFFF && cnt_2 == {{1'b1},{(SIZE_2-1){1'b0}}}) begin
+	   if (mem_secret_num[2] == usr) begin 
+		  mem_secret_num[2] <= mem_secret_num[2];
+		end
+		else begin
+		  mem_secret_num[2] <= usr;
+		end
+	 end
+	 else begin
+	   mem_secret_num[2] <= mem_secret_num[2];
+	 end
+  end
+end
+
+
+always @(*) begin
+    if(s_current_state == STORE_1 || s_current_state == STORE_1_R) begin
+	   STORE_1_LED = 1'b1;
+	 end
+	 else begin
+	   STORE_1_LED = 1'b0;
+	 end
+ end
+
+always @(*) begin
+    if(s_current_state == STORE_2 || s_current_state == STORE_2_R) begin
+	   STORE_2_LED = 1'b1;
+	 end
+	 else begin
+	   STORE_2_LED = 1'b0;
+	 end
+ end
+
+always @(*) begin
+    if(s_current_state == STORE_3 || s_current_state == STORE_3_R) begin
+	   STORE_3_LED = 1'b1;
+	 end
+	 else begin
+	   STORE_3_LED = 1'b0;
+	 end
+ end
+
+
+endmodule

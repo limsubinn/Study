@@ -1,0 +1,12 @@
+
+State Machine - |lock|cur_state
+Name cur_state.BUT_3_R cur_state.BUT_2 cur_state.BUT_2_R cur_state.BUT_1 cur_state.BUT_1_R cur_state.STAR cur_state.STAR_R cur_state.IDLE cur_state.BUT_3 
+cur_state.IDLE 0 0 0 0 0 0 0 0 0 
+cur_state.STAR_R 0 0 0 0 0 0 1 1 0 
+cur_state.STAR 0 0 0 0 0 1 0 1 0 
+cur_state.BUT_1_R 0 0 0 0 1 0 0 1 0 
+cur_state.BUT_1 0 0 0 1 0 0 0 1 0 
+cur_state.BUT_2_R 0 0 1 0 0 0 0 1 0 
+cur_state.BUT_2 0 1 0 0 0 0 0 1 0 
+cur_state.BUT_3_R 1 0 0 0 0 0 0 1 0 
+cur_state.BUT_3 0 0 0 0 0 0 0 1 1 

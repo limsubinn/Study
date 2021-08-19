@@ -1,0 +1,6 @@
+사용해야 하는 부품들
+1. MCP3208-BI/P : 12-bit ADC, SPI serial interface
+2. 센서 2개 (자유 선택)
+3. UART : TX/RX 모두 가능
+4. 스위치, 2가지 종류, 각각 1개씩
++ 자유롭게 더 추가
