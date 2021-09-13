@@ -1,3 +1,9 @@
+'''
+데이터사이언스 2주차 과제2
+
+score.xlsx 파일을 mysql 데이터베이스 안에 score 테이블로 생성
+'''
+
 import pandas as pd
 import pymysql
 
