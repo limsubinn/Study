@@ -20,4 +20,3 @@ plt.xticks(x)                                           # x축 범위
 plt.yticks(np.arange(y[0], y[10]+2, (y[10]-y[0])/10))   # y축 범위
 plt.plot(x, y, marker='o')                              # 그래프 그리기
 plt.show()
-
