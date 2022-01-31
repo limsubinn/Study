@@ -1,4 +1,0 @@
-
-*** Running vivado
-    with args -log zynq_custom_auto_pc_1.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source zynq_custom_auto_pc_1.tcl
-
