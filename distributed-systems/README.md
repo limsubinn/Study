@@ -34,44 +34,44 @@
 ### 1) Client
 - 생성자를 통해 GUI를 설정한다.
 - 각 패널 화면을 구성한 후에 GUI요소들을 배치한다.
-1) connectServer()
-: 소켓 객체를 생성하여 ip주소와 port번호를 설정한다. 
-: 입출력 스트림을 생성하여 데이터를 주고 받는다.
-: 스레드로 여러 client를 관리한다.
-2) actionPerformed()
-: 액션이벤트를 처리하는 메소드로 GUI의 각 구성요소에 대한 액션들을 처리한다.
+1) connectServer() <br>
+: 소켓 객체를 생성하여 ip주소와 port번호를 설정한다. <br> 
+: 입출력 스트림을 생성하여 데이터를 주고 받는다.<br>
+: 스레드로 여러 client를 관리한다. <br>
+2) actionPerformed() <br>
+: 액션이벤트를 처리하는 메소드로 GUI의 각 구성요소에 대한 액션들을 처리한다. <br>
 : 로그인, 로그아웃, 종료, 채팅입력 - 4개의 구성요소를 클릭했을 때 이벤트들을 처리한다.
-3) run()
+3) run() <br>
 : 채팅을 주고 받는 기능을 구현한다.
 
 ### 2) Server
 - 서버 소켓을 생성하고 accept를 이용하여 클라이언트 소켓을 받는다.
 - ArrayList를 통해 클라이언트의 스레드를 관리한다.
-1) msgSendAll
+1) msgSendAll <br>
 : ArrayList에 담겨진 client-chat thread들의 채팅창에 메시지를 띄운다.
 
 ### 3) ChatThread
-- thread를 상속받는 Server class안에 선언된 내부 class이다
-1) run()
-: 입출력 스트림을 통해 채팅창에 메시지를 띄운다.
-: 로그인 ,로그아웃, 종료 이벤트를 포함하여 게임을 진행하는 모든 이벤트를 처리한다.
-: Game class에 대한 객체를 생성하고, 해당 객체를 통한 getStrike(),getBall(), getCount(), getValue()를 호출하여 서버에 알려준다.
+- thread를 상속받는 Server class안에 선언된 내부 class이다.
+1) run() <br>
+: 입출력 스트림을 통해 채팅창에 메시지를 띄운다. <br>
+: 로그인 ,로그아웃, 종료 이벤트를 포함하여 게임을 진행하는 모든 이벤트를 처리한다. <br>
+: Game class에 대한 객체를 생성하고, 해당 객체를 통한 getStrike(),getBall(), getCount(), getValue()를 호출하여 서버에 알려준다. <br>
 : 타입의 val (getValue())값에 따라 게임의 결과를 client 채팅창에 출력한다.
 
 ### 4) Game
 - 게임을 진행하는 class이다.
-1) randomInt()
-: 숫자 3개를 랜덤으로 생성하는 메소드이다.
-: 길이가 3인 배열에 각 숫자를 난수생성하여 저장한다.
+1) randomInt() <br>
+: 숫자 3개를 랜덤으로 생성하는 메소드이다. <br>
+: 길이가 3인 배열에 각 숫자를 난수생성하여 저장한다. <br>
 : 생성한 숫자를 server에 띄움으로써 사용자는 정답을 확인할 수 있다. 
-2) inputUserNumber()
-: 사용자 값을 입력 받아 처리하는 함수이다.
+2) inputUserNumber() <br>
+: 사용자 값을 입력 받아 처리하는 함수이다. <br>
 : 입력 받은 사용자 값과 정답을 count()의 매개변수로 전달한다.
-3) count()
-: 사용자에게 입력 받은 숫자와 정답 숫자를 비교하여 strike, ball, cnt 의 값을 결정한다.
+3) count() <br>
+: 사용자에게 입력 받은 숫자와 정답 숫자를 비교하여 strike, ball, cnt 의 값을 결정한다. <br>
 : strike가 NUM ,즉 정답일 경우에 val =true로 변경하여 getvalue()를 통해 게임의 결과를 넘겨준다.
-4) getStrike(),getBall(), getCount(), getValue()
-각각 strike 횟수, ball 횟수, cnt(게임시도) 횟수, val(게임의 결과값)을 넘겨주는 메소드이다.
+4) getStrike(),getBall(), getCount(), getValue() <br>
+: 각각 strike 횟수, ball 횟수, cnt(게임시도) 횟수, val(게임의 결과값)을 넘겨주는 메소드이다.
 
 <br/>
 <br/>
